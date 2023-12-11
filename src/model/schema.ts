@@ -21,7 +21,7 @@ export default appSchema({
             columns: [
                 { name: 'item_id', type: 'string' },
                 { name: 'store_id', type: 'string' },
-                { name: 'price', type: 'number' },
+                { name: 'cost', type: 'number' },
                 { name: 'noted_at', type: 'number' },
             ]
         }),
