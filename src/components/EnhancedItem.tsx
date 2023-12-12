@@ -1,11 +1,16 @@
 import { withObservables } from '@nozbe/watermelondb/react'
+import { Text, View } from "react-native";
+import Item from '../model/Item';
 
 
-function SingleItem(item: any): React.JSX.Element {
+function SingleItem(props: { item: Item; }): React.JSX.Element {
+
+    const {item} = props;
+
     return (
-        <div>
-            <p>{item.item_name}</p>
-        </div>
+        <View>
+            <Text>{item.item_name}</Text>
+        </View>
     );
 }
 

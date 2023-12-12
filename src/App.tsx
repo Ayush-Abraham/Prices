@@ -8,11 +8,13 @@
 import React, { useEffect, useState } from 'react';
 import type { PropsWithChildren } from 'react';
 import {
+    Button,
     SafeAreaView,
     ScrollView,
     StatusBar,
     StyleSheet,
     Text,
+    TextInput,
     useColorScheme,
     View,
 } from 'react-native';
@@ -29,7 +31,7 @@ import {
 
 
 
-import { Collection, Database } from '@nozbe/watermelondb';
+import { Collection, Database, Q } from '@nozbe/watermelondb';
 import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite';
 
 
@@ -82,44 +84,82 @@ const database = new Database({
 function App(): React.JSX.Element {
 
     const [count, setCount] = useState(0);
+    const [newItemName, setNewItemName] = useState('');
 
 
-    useEffect(() => {
-        // this code will run once
-        console.log('asdfasd')
+    async function testAddItem() {
+        await database.write(async () => {
+            const itemCollection: Collection<Item> = database.collections.get('items')
+            const newItem = await itemCollection.create(item => {
+                item.item_name = 'testItem_Name__' + String(count)
+            }).catch(console.error)
+            console.log('inside testadditem')
+            setCount(count + 1)
+        })
+
+    }
+
+    async function handleAddItem() {
+        console.log('handleadditem')
+        console.log(newItemName)
+
+        const newItemNameTrimmed = newItemName.trim()
         
-        async function testAddItem() {
+        if (newItemNameTrimmed.length == 0) {
+            console.log('item name length shouldnt be zero')
+        }
+        else {
             await database.write(async () => {
                 const itemCollection: Collection<Item> = database.collections.get('items')
-                const newItem = await itemCollection.create(item => {
-                    item.item_name = 'testItemName_'+ String(count)
-                }).catch(console.error)
-                // console.log('inside testadditem')
+                const n_existingItems = await itemCollection.query(
+                    Q.where('item_name', newItemNameTrimmed)
+                ).fetchCount()
+                
+                if (n_existingItems != 0){
+                    console.log('this name already exists')
+                }
+                else {
+                    console.log(newItemNameTrimmed+' doesnt exist, ok to add')
+
+                    const newItem = await itemCollection.create(item => {
+                        item.item_name = newItemNameTrimmed
+                    }).catch(console.error)
+                    setCount(count+1)
+                }
             })
-            
         }
 
-        if (count <=2 ){
-            console.log(testAddItem().catch(()=>{console.log('failed')}));
-            // console.log('after testadditem');
-            setCount(count+1)
-        }
-
-        
-
-    }, [count])
+    }
 
 
 
-
-
-    return(
+    return (
         <View>
             <Text>Test Loadup</Text>
             {/* <EnhancedItemsBox items = {getAllItems()}/> */}
             <Text>{count}</Text>
-            <ItemsBox database={database}/>
-            
+            <Button
+                onPress={testAddItem}
+                title="test add more"
+            />
+            <Text>{newItemName}</Text>
+
+
+            <View>
+                <TextInput
+                    onChangeText={setNewItemName}
+                    value={newItemName}
+                />
+                <Button
+                    title = 'Add Item'
+                    onPress={handleAddItem}
+                />
+            </View>
+
+
+            <ItemsBox database={database} count={count} />
+            {/* <EnhancedItemsBox database = {database}/> */}
+
         </View>
     );
 }

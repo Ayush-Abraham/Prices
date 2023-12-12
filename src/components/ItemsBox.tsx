@@ -6,11 +6,12 @@ import Item from "../model/Item";
 
 
 interface ListComponentProps {
-    database: Database
+    database: Database,
+    count: number,
 }
 
 
-const ItemsBox: React.FC<ListComponentProps> = ({database}) => {
+const ItemsBox: React.FC<ListComponentProps> = ({database, count}) => {
     const [items, setItems] = useState<Item[]>([]);
 
     useEffect(() => {
@@ -22,7 +23,7 @@ const ItemsBox: React.FC<ListComponentProps> = ({database}) => {
 
         fetchAllItems().catch(()=> {console.error})
 
-    }, [database])
+    }, [count])
 
     return(
         <FlatList
