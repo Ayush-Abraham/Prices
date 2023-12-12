@@ -13,6 +13,6 @@ export default class Price extends Model {
     @text('noted_at') noted_at: any
 
 
-    @immutableRelation('items', 'item_id') item
-    @immutableRelation('stores', 'store_id') store
+    @immutableRelation('items', 'item_id') item: any
+    @immutableRelation('stores', 'store_id') store: any
 }

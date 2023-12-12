@@ -5,7 +5,7 @@
  * @format
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { PropsWithChildren } from 'react';
 import {
     SafeAreaView,
@@ -26,8 +26,10 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 
 
-import { Platform } from 'react-native';
-import { Database } from '@nozbe/watermelondb';
+
+
+
+import { Collection, Database } from '@nozbe/watermelondb';
 import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite';
 
 
@@ -36,6 +38,9 @@ import migrations from './model/migrations';
 import Item from './model/Item';
 import Store from './model/Store';
 import Price from './model/Price';
+import EnhancedItemsBox from './components/EnhancedItemsBox';
+import ItemsBox from './components/ItemsBox';
+
 
 // First, create the adapter to the underlying database:
 const adapter = new SQLiteAdapter({
@@ -74,44 +79,48 @@ const database = new Database({
 
 
 
-
-
 function App(): React.JSX.Element {
+
+    const [count, setCount] = useState(0);
+
 
     useEffect(() => {
         // this code will run once
         console.log('asdfasd')
-
-        // async function testAddItem() {
-        //     const testItem = await database.get('items').create(post => {
-        //         post.item_name = 'testItemName'                
-        //     })
-        //     console.log('inside testadditem');
-        // }
+        
         async function testAddItem() {
             await database.write(async () => {
-                await database.get('items').create(item => {
-                    item.item_name = 'testItemName'
-                })
-                console.log('inside testadditem')
+                const itemCollection: Collection<Item> = database.collections.get('items')
+                const newItem = await itemCollection.create(item => {
+                    item.item_name = 'testItemName_'+ String(count)
+                }).catch(console.error)
+                // console.log('inside testadditem')
             })
             
         }
-        console.log(testAddItem().catch(()=>{console.log('failed')}));
-        console.log('after testadditem');
+
+        if (count <=2 ){
+            console.log(testAddItem().catch(()=>{console.log('failed')}));
+            // console.log('after testadditem');
+            setCount(count+1)
+        }
 
         
 
+    }, [count])
 
 
-    }, [])
 
 
 
     return(
-        <SafeAreaView>
+        <View>
             <Text>Test Loadup</Text>
-        </SafeAreaView>
+            {/* <EnhancedItemsBox items = {getAllItems()}/> */}
+            <Text>{count}</Text>
+            <ItemsBox database={database}/>
+            
+        </View>
     );
 }
 

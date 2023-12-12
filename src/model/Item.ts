@@ -18,12 +18,12 @@ export default class Item extends Model {
     //     return newItem
     // }
     
-    async addItem(item_name) {
-        const newItem = await this.collections.get('items').create(item => {
-            item.item_name = item_name
-        })
-        return newItem
-    }
+    // async addItem(item_name) {
+    //     const newItem = await this.collections.get('items').create(item => {
+    //         item.item_name = item_name
+    //     })
+    //     return newItem
+    // }
 
 
 
