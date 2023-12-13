@@ -5,6 +5,10 @@ import Item from "../model/Item";
 import ItemsBox from "./ItemsBox";
 import { DbContext } from "../App";
 import { useContext } from 'react';
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../StackParamList";
+import Store from "../model/Store";
 
 
 
@@ -13,6 +17,8 @@ import { useContext } from 'react';
 const HomeScreen = () => {
 
     const database = useContext(DbContext)
+
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
     const [count, setCount] = useState(0);
     const [newItemName, setNewItemName] = useState('');
@@ -26,6 +32,16 @@ const HomeScreen = () => {
             }).catch(console.error)
             console.log('inside testadditem')
             setCount(count + 1)
+        })
+    }
+    
+    async function testAddStore() {
+        await database.write(async () => {
+            const storeCollection: Collection<Store> = database.collections.get('stores')
+            const newStore = await storeCollection.create(store => {
+                store.store_name = 'test_store_Name__' + String(count)
+            }).catch(console.error)
+            console.log('inside testadd store')
         })
     }
 
@@ -61,15 +77,25 @@ const HomeScreen = () => {
 
     }
 
+
+
     return (
         <View>
             <Text>Test Loadup</Text>
             <Text>{count}</Text>
             <Button
                 onPress={testAddItem}
-                title="test add more"
+                title="test add more items"
             />
-            <Text>{newItemName}</Text>
+            <Button
+                onPress={testAddStore}
+                title="test add more stores"
+            />
+            <Button
+                onPress={()=>{navigation.navigate('StoreScreen')}}
+                title="Show stores"
+            />
+            
 
 
             <View>

@@ -7,5 +7,5 @@ export default class Store extends Model {
         prices: { type: 'has_many', foreignKey: 'store_id' },
     }
 
-    @text('store_name') item_name: any
+    @text('store_name') store_name: any
 }

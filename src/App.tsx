@@ -46,6 +46,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './components/HomeScreen';
 import {RootStackParamList} from './StackParamList';
 import ItemDetail from './components/ItemDetail';
+import StoreScreen from './components/StoreScreen';
 
 
 // First, create the adapter to the underlying database:
@@ -145,6 +146,10 @@ function App(): React.JSX.Element {
                 <Stack.Screen
                     name='ItemDetail'
                     component={ItemDetail}
+                />
+                <Stack.Screen
+                    name='StoreScreen'
+                    component={StoreScreen}
                 />
             </Stack.Navigator>
         </NavigationContainer>
