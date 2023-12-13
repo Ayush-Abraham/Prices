@@ -3,6 +3,8 @@ import { FlatList } from "react-native";
 import SingleItem from "./SingleItem";
 import { Collection, Database, Model } from '@nozbe/watermelondb';
 import Item from "../model/Item";
+import { useIsFocused } from '@react-navigation/native';
+
 
 
 interface ListComponentProps {
@@ -13,6 +15,7 @@ interface ListComponentProps {
 
 const ItemsBox: React.FC<ListComponentProps> = ({database, count}) => {
     const [items, setItems] = useState<Item[]>([]);
+    const isFocused = useIsFocused();
 
     useEffect(() => {
         async function fetchAllItems() {
@@ -23,7 +26,7 @@ const ItemsBox: React.FC<ListComponentProps> = ({database, count}) => {
 
         fetchAllItems().catch(()=> {console.error})
 
-    }, [count])
+    }, [count, isFocused])
 
     return(
         <FlatList

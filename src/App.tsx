@@ -28,6 +28,8 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 
 
+import { NavigationContainer } from '@react-navigation/native';
+import { createContext } from 'react';
 
 
 
@@ -40,8 +42,10 @@ import migrations from './model/migrations';
 import Item from './model/Item';
 import Store from './model/Store';
 import Price from './model/Price';
-import EnhancedItemsBox from './components/EnhancedItemsBox';
-import ItemsBox from './components/ItemsBox';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import HomeScreen from './components/HomeScreen';
+import {RootStackParamList} from './StackParamList';
+import ItemDetail from './components/ItemDetail';
 
 
 // First, create the adapter to the underlying database:
@@ -70,13 +74,11 @@ const database = new Database({
     ],
 })
 
+export const DbContext = createContext(database)
 
 
 
-
-
-
-
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 
 
@@ -104,7 +106,7 @@ function App(): React.JSX.Element {
         console.log(newItemName)
 
         const newItemNameTrimmed = newItemName.trim()
-        
+
         if (newItemNameTrimmed.length == 0) {
             console.log('item name length shouldnt be zero')
         }
@@ -114,17 +116,17 @@ function App(): React.JSX.Element {
                 const n_existingItems = await itemCollection.query(
                     Q.where('item_name', newItemNameTrimmed)
                 ).fetchCount()
-                
-                if (n_existingItems != 0){
+
+                if (n_existingItems != 0) {
                     console.log('this name already exists')
                 }
                 else {
-                    console.log(newItemNameTrimmed+' doesnt exist, ok to add')
+                    console.log(newItemNameTrimmed + ' doesnt exist, ok to add')
 
                     const newItem = await itemCollection.create(item => {
                         item.item_name = newItemNameTrimmed
                     }).catch(console.error)
-                    setCount(count+1)
+                    setCount(count + 1)
                 }
             })
         }
@@ -134,39 +136,31 @@ function App(): React.JSX.Element {
 
 
     return (
-        <View>
-            <Text>Test Loadup</Text>
-            {/* <EnhancedItemsBox items = {getAllItems()}/> */}
-            <Text>{count}</Text>
-            <Button
-                onPress={testAddItem}
-                title="test add more"
-            />
-            <Text>{newItemName}</Text>
-
-
-            <View>
-                <TextInput
-                    onChangeText={setNewItemName}
-                    value={newItemName}
+        <NavigationContainer>
+            <Stack.Navigator>         
+                <Stack.Screen
+                    name="HomeScreen"
+                    component={HomeScreen}
                 />
-                <Button
-                    title = 'Add Item'
-                    onPress={handleAddItem}
+                <Stack.Screen
+                    name='ItemDetail'
+                    component={ItemDetail}
                 />
-            </View>
-
-
-            <ItemsBox database={database} count={count} />
-            {/* <EnhancedItemsBox database = {database}/> */}
-
-        </View>
+            </Stack.Navigator>
+        </NavigationContainer>
     );
 }
 
 
 
-
+// const TestComponent= ({count}:{count:number}) => {
+//     return(
+//         <View>
+//             <Text>Test Component</Text>
+//             <Text>{count}</Text>
+//         </View>
+//     );
+// }
 
 
 
