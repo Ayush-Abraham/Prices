@@ -17,13 +17,13 @@ function StoreScreen() {
     const database = useContext(DbContext)
 
     useEffect(() => {
-        async function fetchAllItems() {
+        async function fetchStores() {
             const storesCollection: Collection<Store> = database.collections.get('stores')
             const allStores: Store[] = await storesCollection.query().fetch()//.catch(()=> {console.log('FAILED TO FETCH 1')});
             setStores(allStores);
         }
 
-        fetchAllItems().catch(() => { console.error })
+        fetchStores().catch(() => { console.error })
 
     }, [count, isFocused])
 

@@ -9,8 +9,10 @@ export default class Price extends Model {
         stores: { type: 'belongs_to', key: 'store_id' },
     }
 
-    @text('cost') cost: any
+    @field('cost') cost: any
     @text('noted_at') noted_at: any
+    @text('item_id') item_id: any
+    @text('store_id') store_id: any
 
 
     @immutableRelation('items', 'item_id') item: any

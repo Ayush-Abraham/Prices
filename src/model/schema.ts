@@ -19,10 +19,10 @@ export default appSchema({
         tableSchema({
             name: 'prices',
             columns: [
-                { name: 'item_id', type: 'string' },
-                { name: 'store_id', type: 'string' },
-                { name: 'cost', type: 'number' },
-                { name: 'noted_at', type: 'number' },
+                { name: 'item_id', type: 'string', isOptional: false },
+                { name: 'store_id', type: 'string', isOptional: false  },
+                { name: 'cost', type: 'number', isOptional: false  },
+                { name: 'noted_at', type: 'string', isOptional: false  },
             ]
         }),
     ]

@@ -8,6 +8,8 @@ import { Collection, Q } from "@nozbe/watermelondb";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import PriceForm from "./PriceForm";
 import Price from "../model/Price";
+import PricesBox from "./PricesBox";
+import PricesChart from "./PricesChart";
 
 
 
@@ -20,6 +22,7 @@ function ItemDetail() {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
     const [item, setItem] = useState<Item>();
+    const [prices, setPrices] = useState<Price[]>([]);
     const [showPriceForm, setShowPriceForm] = useState(false)
 
     useEffect(() => {
@@ -29,6 +32,12 @@ function ItemDetail() {
                 Q.where('id', item_id)
             ).fetch()
             setItem(foundItems[0])
+
+            const pricesCollection: Collection<Price> = database.collections.get('prices')
+            const foundPrices: Price[] = await pricesCollection.query(
+                Q.where('item_id', item_id)
+            ).fetch()
+            setPrices(foundPrices);
         }
 
         fetchItemDetails().catch(()=> {console.error})
@@ -46,16 +55,6 @@ function ItemDetail() {
                 text: 'Cancel',
             }
         ])
-
-
-        // await database.write(async () => {
-        //     const itemsCollection: Collection<Item> = database.collections.get('items')
-        //     const foundItems: Item[] = await itemsCollection.query(
-        //         Q.where('id', item_id)
-        //     ).fetch()
-        //     await foundItems[0].destroyPermanently().catch(console.error)
-        //     navigation.goBack()
-        // })    
     }
     
     async function deleteItem() {
@@ -87,6 +86,9 @@ function ItemDetail() {
             <Text>Item Details</Text>
             <Text>{item_id}</Text>
             <Text>{item?.item_name}</Text>
+
+            <PricesChart prices={prices}/>
+
             <Button
                 title="Delete item"
                 onPress={handleDeleteItem}
@@ -95,7 +97,9 @@ function ItemDetail() {
                 title={showPriceForm ? 'Back' : "Add new price"}
                 onPress={()=>{setShowPriceForm(!showPriceForm)}}
             />
-            {showPriceForm && <PriceForm/>}
+            {showPriceForm && <PriceForm item_id={item_id}/>}
+            <PricesBox item_id={item_id} prices={prices}/>
+            <Text>Item details end</Text>
         </View>
     );
 }
