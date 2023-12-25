@@ -14,6 +14,7 @@ export default appSchema({
             name: 'stores',
             columns: [
                 { name: 'store_name', type: 'string' },
+                { name: 'colour', type: 'string' },
             ]
         }),
         tableSchema({

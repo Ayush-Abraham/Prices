@@ -1,6 +1,6 @@
 import { Alert, Button, Text, View } from "react-native";
 import Item from "../model/Item";
-import { ItemDetailRouteProp, RootStackParamList } from "../StackParamList";
+import { ItemDetailRouteProp, PriceDetail, RootStackParamList } from "../types";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { DbContext } from "../App";
 import { useContext, useEffect, useState } from 'react';
@@ -10,7 +10,8 @@ import PriceForm from "./PriceForm";
 import Price from "../model/Price";
 import PricesBox from "./PricesBox";
 import PricesChart from "./PricesChart";
-
+import Store from "../model/Store";
+import { StoreMap } from "../types";
 
 
 function ItemDetail() {
@@ -22,8 +23,18 @@ function ItemDetail() {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
     const [item, setItem] = useState<Item>();
-    const [prices, setPrices] = useState<Price[]>([]);
+    // const [prices, setPrices] = useState<Price[]>([]);
     const [showPriceForm, setShowPriceForm] = useState(false)
+    const [count, setCount] = useState(0)
+    const [priceDetails, setPriceDetails] = useState<PriceDetail>({
+        prices: [],
+        storeMap: {
+            'a': {
+                store_name: 'a',
+                store_colour: 'red'
+            }
+        }
+    });
 
     useEffect(() => {
         async function fetchItemDetails() {
@@ -37,12 +48,46 @@ function ItemDetail() {
             const foundPrices: Price[] = await pricesCollection.query(
                 Q.where('item_id', item_id)
             ).fetch()
-            setPrices(foundPrices);
+            // setPrices(foundPrices);
+
+            const storeCollection: Collection<Store> = database.collections.get('stores')
+            const allStores = await storeCollection.query().fetch()
+
+            console.log("allStores")
+            console.log(allStores)
+
+
+            const calcStoreMap: StoreMap = allStores.reduce(
+                (acc, obj) => {
+                    const { id, store_name, colour } = obj
+                    acc[id] = {
+                        store_name: store_name,
+                        store_colour: colour
+                    }
+                    return acc
+                },
+                {} as StoreMap
+            )
+
+            console.log('calc store map')
+            console.log(calcStoreMap)
+            
+
+            setPriceDetails(
+                {
+                    prices: foundPrices,
+                    storeMap: calcStoreMap
+                }
+            )
+
+            console.log('store Map')
+            console.log(priceDetails.storeMap)
+
         }
 
-        fetchItemDetails().catch(()=> {console.error})
+        fetchItemDetails().catch(() => { console.error })
 
-    }, [])
+    }, [count])
 
     async function handleDeleteItem() {
 
@@ -56,7 +101,7 @@ function ItemDetail() {
             }
         ])
     }
-    
+
     async function deleteItem() {
 
         await database.write(async () => {
@@ -70,13 +115,13 @@ function ItemDetail() {
             const foundPrices: Price[] = await pricesCollection.query(
                 Q.where('item_id', item_id)
             ).fetch()
-            
-            for (let i=0; i< foundPrices.length; i++) {
+
+            for (let i = 0; i < foundPrices.length; i++) {
                 await foundPrices[i].destroyPermanently().catch(console.error)
             }
 
             navigation.goBack()
-        })    
+        })
     }
 
 
@@ -87,18 +132,23 @@ function ItemDetail() {
             <Text>{item_id}</Text>
             <Text>{item?.item_name}</Text>
 
-            <PricesChart prices={prices}/>
-
             <Button
                 title="Delete item"
                 onPress={handleDeleteItem}
             />
             <Button
                 title={showPriceForm ? 'Back' : "Add new price"}
-                onPress={()=>{setShowPriceForm(!showPriceForm)}}
+                onPress={() => { setShowPriceForm(!showPriceForm) }}
             />
-            {showPriceForm && <PriceForm item_id={item_id}/>}
-            <PricesBox item_id={item_id} prices={prices}/>
+            <PriceForm
+                item_id={item_id}
+                isVisible={showPriceForm}
+                setVisible={setShowPriceForm}
+                count={count}
+                setCount={setCount}
+            />
+            <PricesChart priceDetails={priceDetails} />
+            <PricesBox item_id={item_id} priceDetails={priceDetails} />
             <Text>Item details end</Text>
         </View>
     );

@@ -1,10 +1,12 @@
 import { useContext, useEffect, useState } from "react";
 import Store from "../model/Store";
-import { FlatList, View } from "react-native";
+import { FlatList, Pressable, Text, View } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
 import { Collection } from "@nozbe/watermelondb";
 import { DbContext } from "../App";
 import SingleStore from "./SingleStore";
+import { modalStyles } from "./styles/Styles";
+import StoreForm from "./StoreForm";
 
 
 
@@ -12,6 +14,7 @@ function StoreScreen() {
 
     const [stores, setStores] = useState<Store[]>([]);
     const [count, setCount] = useState(0);
+    const [showStoreForm, setShowStoreForm] = useState(false);
     const isFocused = useIsFocused();
 
     const database = useContext(DbContext)
@@ -29,6 +32,23 @@ function StoreScreen() {
 
     return (
         <View>
+
+            <Pressable
+                style={[modalStyles.button, modalStyles.buttonOpen]}
+                onPress={() => setShowStoreForm(true)}
+            >
+                <Text style={modalStyles.textStyle}>Add Store</Text>
+            </Pressable>
+
+            <StoreForm                
+                isVisible={showStoreForm}
+                setVisible={setShowStoreForm}
+                count={count}
+                setCount={setCount}
+            />
+
+
+
             <FlatList
                 data={stores}
                 keyExtractor={(store) => store.id.toString()}

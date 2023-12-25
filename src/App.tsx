@@ -5,27 +5,8 @@
  * @format
  */
 
-import React, { useEffect, useState } from 'react';
-import type { PropsWithChildren } from 'react';
-import {
-    Button,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TextInput,
-    useColorScheme,
-    View,
-} from 'react-native';
+import React, { useState } from 'react';
 
-import {
-    Colors,
-    DebugInstructions,
-    Header,
-    LearnMoreLinks,
-    ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 
 
 import { NavigationContainer } from '@react-navigation/native';
@@ -44,7 +25,7 @@ import Store from './model/Store';
 import Price from './model/Price';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './components/HomeScreen';
-import {RootStackParamList} from './StackParamList';
+import {RootStackParamList} from './types';
 import ItemDetail from './components/ItemDetail';
 import StoreScreen from './components/StoreScreen';
 

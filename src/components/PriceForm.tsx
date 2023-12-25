@@ -1,25 +1,32 @@
 import { useContext, useEffect, useState } from "react";
-import { Alert, Button, ScrollView, TextInput, View } from "react-native"
+import { Alert, Modal, Pressable, Text, TextInput, View } from "react-native"
 import { DbContext } from "../App";
 import { Collection, Q } from "@nozbe/watermelondb";
 import Store from "../model/Store";
 import type { PickerItem } from 'react-native-woodpicker'
 import { Picker, DatePicker } from 'react-native-woodpicker'
 import Price from "../model/Price";
+import { pickerStyles, modalStyles } from "./styles/Styles";
 
 
-function PriceForm(props: { item_id: string }) {
+function PriceForm(props: {
+    item_id: string,
+    isVisible: boolean,
+    setVisible: React.Dispatch<React.SetStateAction<boolean>>,
+    count: number,
+    setCount: React.Dispatch<React.SetStateAction<number>>
+}) {
 
-    const { item_id } = props;
+    const { item_id, isVisible, setVisible, count, setCount } = props;
 
     const defaultStore = { label: 'Select a store', value: null }
     const defaultDate: Date = new Date
 
     const [selectedStore, setSelectedStore] = useState<PickerItem>(defaultStore);
-    const [storePickerItems, setStorePickerItems] = useState<PickerItem[]>([defaultStore]);
+    const [storePickerItems, setStorePickerItems] = useState<PickerItem[]>([]);
 
     const [selectedDate, setSelectedDate] = useState<Date>(defaultDate);
-    const [price, setPrice] = useState('0');
+    const [price, setPrice] = useState('0.0');
 
     const database = useContext(DbContext)
 
@@ -35,7 +42,10 @@ function PriceForm(props: { item_id: string }) {
                 pickerStores.push({ label: allStores[i].store_name, value: allStores[i] })
             }
 
-            setStorePickerItems(pickerStores);
+            const finalPickerStores = [defaultStore]
+            finalPickerStores.push(...pickerStores)
+
+            setStorePickerItems(finalPickerStores);
         }
 
         fetchStores().catch(() => { console.error })
@@ -64,7 +74,7 @@ function PriceForm(props: { item_id: string }) {
         }
         else {
 
-            if (selectedStore.value == null) {
+            if (selectedStore == undefined || selectedStore == null) {
                 Alert.alert('Please select a store', '', [
                     {
                         text: 'Ok',
@@ -105,74 +115,80 @@ function PriceForm(props: { item_id: string }) {
                             price.noted_at = stringDate
                         }).catch(console.error)
                         console.log('added price')
+
+                        setCount(count+1)
+                        handleClose()
                     }
                 })
             }
         }
     }
 
+    function handleClose() {
+        setVisible(false)
+        setPrice('0.0')
+    }
+
 
 
 
     return (
-        <View style={{
-            flexGrow: 1,
-            backgroundColor: 'beige',
-            borderWidth: 2,
-            padding: 10
-        }}>
-            {/* <View> */}
+        <Modal
+            animationType="slide"
+            transparent={true}
+            visible={isVisible}
+        >
+            <View style={modalStyles.centeredView}>
+                <View style={modalStyles.modalView}>
 
-            {/* <ScrollView> */}
-            <Button
-                title='Add price observation'
-                onPress={handleAddObservation}
-            />
-            <TextInput
-                onChangeText={setPrice}
-                value={price}
-            />
-            <View style={{
-                flex: 0.4,
-                borderWidth: 0.5,
-                padding: 10
-            }}>
+                    <Text style={modalStyles.modalText}>Add new price observation</Text>
 
-                <Picker
-                    item={selectedStore}
-                    items={storePickerItems}
-                    onItemChange={setSelectedStore}
-                    placeholder="Select store"
-                    isNullable={false}
-                    mode="dropdown"
-                />
+                    <TextInput
+                        style={modalStyles.modalTextInput}
+                        onChangeText={setPrice}
+                        value={price}
+                        keyboardType="numeric"
+                    />
+
+                    <Picker
+                        style={pickerStyles.storePicker}
+                        item={selectedStore}
+                        items={storePickerItems}
+                        onItemChange={setSelectedStore}
+                        // placeholder="Select store"
+                        isNullable={false}
+                        mode="dropdown"
+                    />
+
+                    <DatePicker
+                        value={selectedDate}
+                        onDateChange={(value) => handleSetDate(value)}
+                        title='Select date of observation'
+                        text={selectedDate.toDateString()}
+                        isNullable={false}
+                        style={pickerStyles.datePicker}
+                    />
+
+                    <View style={modalStyles.modalHorizontalContainer}>
+                        <Pressable
+                            style={[modalStyles.button, modalStyles.buttonClose]}
+                            onPress={handleAddObservation}
+                        >
+                            <Text style={modalStyles.textStyle}>Add price</Text>
+                        </Pressable>
+                        <Pressable
+                            style={[modalStyles.button, modalStyles.buttonClose]}
+                            onPress={handleClose}
+                        >
+                            <Text style={modalStyles.textStyle}>Cancel</Text>
+                        </Pressable>
+                    </View>
+
+
+
+                </View>
             </View>
-            <View style={{
-                flex: 0,
-                // flexGrow: 0.,
-                borderWidth: 0.5,
-                padding: 10
-
-            }}>
-                <DatePicker
-                    value={selectedDate}
-                    onDateChange={(value) => handleSetDate(value)}
-                    // onDateChange={setSelectedDate}
-                    title='Select date of observation'
-                    text={selectedDate.toDateString()}
-                    // text={'asdf'}
-                    isNullable={false}
-
-                />
-
-            </View>
-
-
-
-
-
-            {/* </ScrollView> */}
-        </View>
+        </Modal>
     )
 }
 

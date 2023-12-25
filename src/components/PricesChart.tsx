@@ -1,59 +1,72 @@
-import { Text, View } from "react-native";
+import { FlatList, Text, View } from "react-native";
 import Price from "../model/Price";
-import { LineChart } from "react-native-chart-kit";
 import { Dimensions } from "react-native";
 import { useEffect, useState } from "react";
-import { Dataset } from "react-native-chart-kit/dist/HelperTypes";
-import { LineChartData } from "react-native-chart-kit/dist/line-chart/LineChart";
+import { VictoryChart, VictoryTheme, VictoryLine, VictoryLegend, VictoryCursorContainer, VictoryAxis, VictoryLabel, VictoryScatter } from "victory-native";
+import { PriceDetail } from "../types";
+
+
+type DataEntry = {
+    // x: Date,
+    // x: string,
+    x: number,
+    y: number | null
+}
+
+type Legend = {
+    name: string; symbol: { fill: string; type: string; };
+}
+
+function createDateString(num: number): string {
+    const strNum: string = num.toString()
+    // console.log('strnum ', strNum)
+    const strInt = strNum.slice(0, 8)
+    // console.log('string ', strInt)
+    const dateString = strInt.slice(6, 8) + '/' + strInt.slice(4, 6) + '/' + strInt.slice(0, 4)
+    // console.log('datestring ', dateString)
+    return dateString
+}
+
+function dateStrToNum(dateStr: string) {
+    const date = new Date(dateStr)
+    return Number('' + date.getFullYear() + (date.getMonth() + 1) + date.getDate())
+}
+
+function createArrayInRange(start: number, end: number) {
+    return Array.from({ length: end - start + 1 }, (_, index) => start + index);
+}
 
 
 
-function PricesChart(props: { prices: Price[] }) {
+function PricesChart(props: { priceDetails: PriceDetail }) {
 
-    const { prices } = props
+    const { priceDetails } = props
+    const prices = priceDetails.prices
+    const storeMap = priceDetails.storeMap
 
-    const [data, setData] = useState<LineChartData>(
-        // {
-        //     labels: ['a'],
-        //     datasets: [
-        //         {
-        //             data: [1, null, 3]
-        //         },
-        //         {
-        //             data: [4, 5, 6]
-        //         },
-
-        //     ],
-        //     legend: ['a', 'b']
-        // }
+    const [datasets, setDatasets] = useState<{ [key: string]: DataEntry[] }>(
         {
-            "datasets": [
+            "a": [
                 {
-                    "data": [14, 15, 16]
-                },
-                {
-                    "data": [13, 11, 19, 14]
+                    'x': 0,
+                    "y": null
                 }
-            ],
-            "labels": ["01-12", "02-12", "03-12", "05-12", "07-12"],
-            "legend": ["Store 1", "Store 2"],
+            ]
         }
     );
 
     const [isLoaded, setIsLoaded] = useState(false);
+    const [legend, setLegend] = useState<Legend[]>();
+    const [limits, setLimits] = useState(
+        {
+            maxCost: 0,
+            earliestDate: 20231201,
+            latestDate: 20231213
+        }
+    );
+
 
     const screenWidth = Dimensions.get("window").width;
-    const chartConfig = {
-        backgroundColor: '#1cc910',
-        backgroundGradientFrom: '#eff3ff',
-        backgroundGradientTo: '#efefef',
-        decimalPlaces: 2,
-        color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-        style: {
-            borderRadius: 16,
-        },
-    };
-
 
 
     useEffect(() => {
@@ -69,119 +82,76 @@ function PricesChart(props: { prices: Price[] }) {
                 return 0;
             });
 
+            const maxCost = prices.reduce((max, obj) => {
+                return obj.cost > max ? obj.cost : max;
+            }, -Infinity) + 2
 
-            // Step 1: Group data by date and item_id
-            const groupedData: { [key: string]: Price[] } = sortedPrices.reduce((acc, obj) => {
-                const key = `${obj.noted_at}-${obj.store_id}`;
-                if (!acc[key]) {
-                    acc[key] = [];
-                }
-                acc[key].push(obj);
-                return acc;
-            }, {} as { [key: string]: Price[] });
+            
 
+            const earliestDate = prices.reduce((earliest, obj) => {
+                return Date.parse(obj.noted_at) < Date.parse(earliest.noted_at) ? obj : earliest;
+              }, prices[0]).noted_at;
 
+              console.log('earliest ', earliestDate)
 
-            // Step 2 and 3: Interpolate missing values
-            const interpolatedData = Object.values(groupedData).flatMap((group) => {
-                group.sort((a, b) => Date.parse(a.noted_at) - Date.parse(b.noted_at));
-                const result = [];
+            const latestDate = prices.reduce((latest, obj) => {
+                return Date.parse(obj.noted_at) > Date.parse(latest.noted_at) ? obj : latest;
+            }, prices[0]).noted_at;
 
-                for (let i = 0; i < group.length; i++) {
-                    result.push(group[i]);
+            console.log('latest ', latestDate)
+            
+            setLimits({
+                maxCost: maxCost,
+                earliestDate: dateStrToNum(earliestDate),
+                latestDate: dateStrToNum(latestDate)
+            })
 
-                    if (i < group.length - 1) {
-                        const currentDate = new Date(group[i].noted_at);
-                        const nextDate = new Date(group[i + 1].noted_at);
-
-                        let Difference_In_Time = nextDate.getTime() - currentDate.getTime();
-
-                        // To calculate the no. of days between two dates
-                        const daysDifference =
-                            Math.round(Difference_In_Time / (1000 * 3600 * 24));
-
-                        // const daysDifference = (nextDate - currentDate) / (1000 * 60 * 60 * 24);
-
-                        if (daysDifference > 1) {
-                            // Interpolate missing values
-                            const interpolatedCost =
-                                (group[i + 1].cost + group[i].cost) / 2; // Average cost
-                            for (let j = 1; j < daysDifference; j++) {
-                                const interpolatedDate = new Date(
-                                    currentDate.getTime() + j * 24 * 60 * 60 * 1000
-                                ).toISOString().split('T')[0];
-                                result.push({
-                                    noted_at: interpolatedDate,
-                                    cost: interpolatedCost,
-                                    store_id: group[i].store_id,
-                                });
-                            }
-                        }
-                    }
-                }
-
-                return result;
-            });
-
-            console.log('interpolated ', interpolatedData);
-
-
-
-
-
-
-
-
-            const allDates: string[] = interpolatedData.map(price => price.noted_at)
-
-
-            const costsByStore: { [key: string]: number[] } = interpolatedData.reduce(
+            const groupedByStore: { [key: string]: DataEntry[] } = sortedPrices.reduce(
                 (result, obj) => {
                     const key: string = obj.store_id;
+
+                    console.log(obj.noted_at)
 
                     if (!result[key]) {
                         result[key] = [];
                     }
 
-                    result[key].push(obj.cost);
+                    const date = new Date(obj.noted_at)
+                    console.log(date)
+
+                    result[key].push({
+                        x: Number('' + date.getFullYear() + (date.getMonth() + 1) + date.getDate()),
+                        y: obj.cost
+                    });
 
                     return result;
                 },
-                {} as { [key: string]: number[] }
+                {} as { [key: string]: DataEntry[] }
             );
 
-            console.log('costsbystore', costsByStore);
-
-            console.log('alldates: ', allDates)
 
 
-            const priceDatasets: Dataset[] = []
-            for (const [key, value] of Object.entries(costsByStore)) {
-                const singlePriceDataset: Dataset = {
-                    data: value,
-                    color: (opacity) => `rgb(0, 0, ${opacity * 255})`,
-                }
-                priceDatasets.push(singlePriceDataset)
+            const storeLegend = [...new Set(sortedPrices.map(price => price.store_id))]
+
+            const finalLegend = []
+            for (let i = 0; i < storeLegend.length; i++) {
+                finalLegend.push(
+                    {
+                        name: storeMap[storeLegend[i]].store_name,
+                        symbol: {
+                            fill: storeMap[storeLegend[i]] ? storeMap[storeLegend[i]].store_colour : 'red',
+                            type: "minus"
+                        }
+                    }
+                )
             }
 
-            console.log('pricedatasets', priceDatasets)
+            setDatasets(groupedByStore)
+            setLegend(finalLegend)
 
-            const priceLegend = [...new Set(sortedPrices.map(price => price.store_id))]
 
-            const newData: LineChartData = {
-                labels: allDates,
-                datasets: priceDatasets,
-                legend: priceLegend
-            }
-
-            // setData(newData)
-
-            console.log('newdata', newData)
-
-            console.log('data after setting', data)
-            console.log(data.datasets)
-
-            console.log('data is set')
+            console.log('data is set, ')
+            console.log(groupedByStore)
 
             setIsLoaded(true)
         }
@@ -190,22 +160,51 @@ function PricesChart(props: { prices: Price[] }) {
     }, [prices])
 
 
-
-
-
     return (
         <View>
             <Text>Prices Chart</Text>
-            {isLoaded && <LineChart
-                data={data}
-                width={screenWidth}
-                height={220}
-                chartConfig={chartConfig}
-            />}
-        </View>
+            <VictoryChart
+                theme={VictoryTheme.material}
+                domain={{ y: [0, limits.maxCost] }}
+            >
+
+                <VictoryAxis
+                    fixLabelOverlap
+                    tickFormat={(x) => createDateString(x)}
+                    tickValues={createArrayInRange(limits.earliestDate, limits.latestDate)}
+                    style={{
+                        grid: { stroke: 'grey' },
+                    }}
+                />
+                <VictoryAxis dependentAxis />
+
+                {
+                    Object.entries(datasets).map(([store_id, dataset]) =>
+                        <VictoryLine
+                            key={store_id}
+                            style={{
+                                data: { stroke: storeMap[store_id] ? storeMap[store_id].store_colour : 'red' },
+                                parent: { border: "1px solid #ccc" },
+                            }}
+                            data={dataset}
+                            sortKey='x'
+                        />
+                    )
+                }
+                {
+                    Object.entries(datasets).map(([store_id, dataset]) =>
+                        <VictoryScatter
+                            key={store_id}
+                            data={dataset}
+                        />
+                    )
+                }
+                < VictoryLegend
+                    data={legend}
+                />
+            </VictoryChart>
+        </View >
     )
-
-
 }
 
 export default PricesChart

@@ -8,4 +8,5 @@ export default class Store extends Model {
     }
 
     @text('store_name') store_name: any
+    @text('colour') colour: any
 }

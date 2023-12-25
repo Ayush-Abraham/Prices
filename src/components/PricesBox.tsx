@@ -3,12 +3,15 @@ import { Text } from "react-native-svg";
 import Price from "../model/Price";
 import { DbContext } from "../App";
 import { Collection, Q } from "@nozbe/watermelondb";
-import { FlatList, View } from "react-native";
+import { FlatList, ScrollView, View } from "react-native";
 import SinglePrice from "./SinglePrice";
+import { PriceDetail, StoreMap } from "../types";
 
-function PricesBox(props: { item_id: string; prices: Price[] }) {
+function PricesBox(props: { item_id: string; priceDetails: PriceDetail }) {
 
-    const { item_id, prices } = props;
+    const { item_id, priceDetails } = props;
+    const prices = priceDetails.prices
+    const storeMap = priceDetails.storeMap
 
     // const [prices, setPrices] = useState<Price[]>([]);
     const [count, setCount] = useState(0);
@@ -16,26 +19,27 @@ function PricesBox(props: { item_id: string; prices: Price[] }) {
 
     const database = useContext(DbContext)
 
-    // useEffect(() => {
-    //     async function fetchPrices() {
-    //         const pricesCollection: Collection<Price> = database.collections.get('prices')
-    //         const foundPrices: Price[] = await pricesCollection.query(
-    //             Q.where('item_id', item_id)
-    //         ).fetch()
-    //         setPrices(foundPrices);
-    //     }
+    console.log(prices.map(obj => obj.store_id))
 
-    //     fetchPrices().catch(console.error)
+    console.log('pricesbox storemap')
+    console.log(storeMap)
 
-    // }, [count]) //isfocused
 
     return (
         <View>
+
             <FlatList
                 data={prices}
                 keyExtractor={(price) => price.id.toString()}
-                renderItem={({ item }) => <SinglePrice priceDetail={item}/>}
+                renderItem={({ item }) =>
+                    <SinglePrice
+                        price={item}
+                        store_name={storeMap[item.store_id].store_name}
+                        store_colour={storeMap[item.store_id] ? storeMap[item.store_id].store_colour : 'red'}
+                    />}
+                contentContainerStyle={{flexGrow: 1, paddingBottom: 5}}
             />
+
         </View>
 
     );
