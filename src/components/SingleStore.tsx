@@ -7,7 +7,7 @@ import { useContext, useState } from "react";
 import { DbContext } from "../App";
 import { Collection, Q } from "@nozbe/watermelondb";
 import Price from "../model/Price";
-import { dynamicBgColour, pickerStyles, singleViewStyles } from "./styles/Styles";
+import { dynamicBgColour, pickerStyles, positionStyles, singleViewStyles } from "./styles/Styles";
 import { Picker, PickerItem } from "react-native-woodpicker";
 import { PickerColours } from "../utilities";
 
@@ -19,7 +19,7 @@ function SingleStore(props: { store: Store; }): React.JSX.Element {
 
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-    const [selectedColour, setSelectedColour] = useState<PickerItem>(PickerColours.find((x)=> x.value == store.colour)?? {value: 'red', label: 'red'} )
+    const [selectedColour, setSelectedColour] = useState<PickerItem>(PickerColours.find((x) => x.value == store.colour) ?? { value: 'red', label: 'red' })
 
     const database = useContext(DbContext)
 
@@ -72,7 +72,7 @@ function SingleStore(props: { store: Store; }): React.JSX.Element {
 
             const foundStore = await storesCollection.find(store.id)
 
-            await foundStore.update(()=>{
+            await foundStore.update(() => {
                 foundStore.colour = newColourItem.value
             })
 
@@ -87,20 +87,24 @@ function SingleStore(props: { store: Store; }): React.JSX.Element {
 
 
     return (
-        <View>
-            <Text>{store.store_name}</Text>
-            <Picker
-                style={[dynamicBgColour(store.colour).dynamicBgColour, pickerStyles.colourPicker]}
-                item={selectedColour}
-                items={PickerColours}
-                onItemChange={(col)=>(handleChangeColour(col))}
-                isNullable={false}
-                mode="dropdown"
-            />
-            <Button
-                title={'Delete'}
-                onPress={handleDeleteStore}
-            />
+        <View style={[positionStyles.horizontalContainer, singleViewStyles.viewingCard]}>
+            <View style={positionStyles.horizontalContainer}>
+                <Text>{store.store_name}</Text>
+                <Picker
+                    style={[dynamicBgColour(store.colour).dynamicBgColour, pickerStyles.colourPicker]}
+                    item={selectedColour}
+                    items={PickerColours}
+                    onItemChange={(col) => (handleChangeColour(col))}
+                    isNullable={false}
+                    mode="dropdown"
+                />
+            </View>
+            <View>
+                <Button
+                    title={'Delete'}
+                    onPress={handleDeleteStore}
+                />
+            </View>
         </View>
     );
 }

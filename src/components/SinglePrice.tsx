@@ -6,18 +6,19 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../types";
 import { Collection, Q } from "@nozbe/watermelondb";
+import { positionStyles } from "./styles/Styles";
 
 
 
-function SinglePrice(props: { price: Price; store_name: string, store_colour: string }): React.JSX.Element {
+function SinglePrice(props: { price: Price; store_name: string, store_colour: string, itemDetailsRefresh: ()=> void }): React.JSX.Element {
 
-    const { price, store_colour, store_name } = props;
+    const { price, store_colour, store_name, itemDetailsRefresh } = props;
 
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
     const database = useContext(DbContext)
 
-    async function handleDeletePrice() {
+    function handleDeletePrice() {
 
         Alert.alert('Are you sure?', '', [
             {
@@ -39,20 +40,26 @@ function SinglePrice(props: { price: Price; store_name: string, store_colour: st
             ).fetch()
             await foundPrices[0].destroyPermanently().catch(console.error)
 
-            navigation.goBack()
+            // navigation.goBack()
+            
         })
+        itemDetailsRefresh()
     }
 
 
     return (
-        <View>
-            <Text>{price.cost}</Text>
-            <Text>{price.noted_at}</Text>
-            <Text>{store_name}</Text>
-            <Button
-                title={'Delete'}
-                onPress={handleDeletePrice}
-            />
+        <View style={positionStyles.horizontalContainer}>
+            <View>
+                <Text>{price.cost}</Text>
+                <Text>{price.noted_at}</Text>
+                <Text>{store_name}</Text>
+            </View>
+            <View>
+                <Button
+                    title={'Delete'}
+                    onPress={handleDeletePrice}
+                />
+            </View>
         </View>
     );
 }

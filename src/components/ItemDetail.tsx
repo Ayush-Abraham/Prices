@@ -125,6 +125,10 @@ function ItemDetail() {
     }
 
 
+    function refresh() {
+        setCount(count+1)
+    }
+
 
     return (
         <View>
@@ -144,11 +148,10 @@ function ItemDetail() {
                 item_id={item_id}
                 isVisible={showPriceForm}
                 setVisible={setShowPriceForm}
-                count={count}
-                setCount={setCount}
+                itemDetailsRefresh={refresh}
             />
             <PricesChart priceDetails={priceDetails} />
-            <PricesBox item_id={item_id} priceDetails={priceDetails} />
+            <PricesBox item_id={item_id} priceDetails={priceDetails} itemDetailsRefresh={refresh} />
             <Text>Item details end</Text>
         </View>
     );

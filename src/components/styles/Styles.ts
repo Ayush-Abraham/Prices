@@ -42,12 +42,22 @@ export const singleViewStyles = StyleSheet.create({
     colourBox: {
         width: 10,
         height: 10
+    },
+    viewingCard: {
+        // borderWidth: 1,
+        backgroundColor: 'white',
+        padding: 5,
+        marginHorizontal: 10,
+        marginVertical: 5,
+        borderRadius: 10,
     }
 })
 
 export const positionStyles = StyleSheet.create({
     horizontalContainer: {
         flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignItems: 'center',
     }    
 })
 
@@ -99,7 +109,7 @@ export const modalStyles = StyleSheet.create({
         fontSize: 30,
     },
     modalLabel: {
-        paddingTop: 18,
+        // paddingTop: 10,
         textAlign: 'center',
         fontWeight: 'bold',
         fontSize: 17,

@@ -6,18 +6,17 @@ import Store from "../model/Store";
 import type { PickerItem } from 'react-native-woodpicker'
 import { Picker, DatePicker } from 'react-native-woodpicker'
 import Price from "../model/Price";
-import { pickerStyles, modalStyles } from "./styles/Styles";
+import { pickerStyles, modalStyles, positionStyles } from "./styles/Styles";
 
 
 function PriceForm(props: {
     item_id: string,
     isVisible: boolean,
     setVisible: React.Dispatch<React.SetStateAction<boolean>>,
-    count: number,
-    setCount: React.Dispatch<React.SetStateAction<number>>
+    itemDetailsRefresh: () => void
 }) {
 
-    const { item_id, isVisible, setVisible, count, setCount } = props;
+    const { item_id, isVisible, setVisible, itemDetailsRefresh } = props;
 
     const defaultStore = { label: 'Select a store', value: null }
     const defaultDate: Date = new Date
@@ -116,7 +115,7 @@ function PriceForm(props: {
                         }).catch(console.error)
                         console.log('added price')
 
-                        setCount(count+1)
+                        itemDetailsRefresh()
                         handleClose()
                     }
                 })
@@ -169,7 +168,7 @@ function PriceForm(props: {
                         style={pickerStyles.datePicker}
                     />
 
-                    <View style={modalStyles.modalHorizontalContainer}>
+                    <View style={[positionStyles.horizontalContainer, modalStyles.modalHorizontalContainer]}>
                         <Pressable
                             style={[modalStyles.button, modalStyles.buttonClose]}
                             onPress={handleAddObservation}

@@ -8,8 +8,8 @@ import { PriceDetail } from "../types";
 
 type DataEntry = {
     // x: Date,
-    // x: string,
-    x: number,
+    x: string,
+    // x: number,
     y: number | null
 }
 
@@ -17,23 +17,72 @@ type Legend = {
     name: string; symbol: { fill: string; type: string; };
 }
 
-function createDateString(num: number): string {
-    const strNum: string = num.toString()
-    // console.log('strnum ', strNum)
-    const strInt = strNum.slice(0, 8)
-    // console.log('string ', strInt)
+function dateStrFormat(rawDateStr: string): string {
+    // const strNum: string = num.toString()
+    const strInt = rawDateStr.slice(0, 8)
     const dateString = strInt.slice(6, 8) + '/' + strInt.slice(4, 6) + '/' + strInt.slice(0, 4)
-    // console.log('datestring ', dateString)
     return dateString
 }
 
 function dateStrToNum(dateStr: string) {
     const date = new Date(dateStr)
-    return Number('' + date.getFullYear() + (date.getMonth() + 1) + date.getDate())
+    return Number(''
+    + date.getFullYear()
+    + (date.getMonth() + 1).toString().padStart(2, '0')
+    + date.getDate().toString().padStart(2, '0')
+    )
 }
 
-function createArrayInRange(start: number, end: number) {
-    return Array.from({ length: end - start + 1 }, (_, index) => start + index);
+function dateObjToNum(dateObj: Date) {
+    const date = dateObj.getDate().toString().padStart(2, '0')
+    const month = (dateObj.getMonth()+1).toString().padStart(2, '0')
+    const year = dateObj.getFullYear().toString()
+    const dateNum = Number(year + month + date)
+    console.log('datenum',dateNum);    
+    return dateNum
+}
+
+function dateObjToRawStr(dateObj: Date) {
+    const date = dateObj.getDate().toString().padStart(2, '0')
+    const month = (dateObj.getMonth()+1).toString().padStart(2, '0')
+    const year = dateObj.getFullYear().toString()
+    const dateStr = year+month+date
+    return dateStr
+}
+
+
+function dateStrToObj(dateStr: string) {
+    // const strNum: string = dateNum.toString()   
+    console.log(dateStr) 
+    const strInt = dateStr.slice(0, 8)
+    const dateString = strInt.slice(0, 4) + '-' + strInt.slice(4, 6) + '-' + strInt.slice(6, 8)
+    console.log(dateString);
+    const dateObj = new Date(dateString)
+    // console.log(dateObj);    
+    return dateObj
+}
+
+// function createArrayInRange(start: number, end: number) {
+//     return Array.from({ length: end - start + 1 }, (_, index) => start + index);
+// }
+
+function dateStrsInRange(start: string, end: string) {
+    const curDate = new Date(start)//dateStrToObj(start)
+    const endDate = new Date(end)//dateStrToObj(end)
+
+    console.log('datestrsinrange', start, end);
+    
+    console.log(curDate, endDate)
+
+    const dates = []
+
+    while (curDate <= endDate) {
+        dates.push(dateObjToRawStr(curDate))
+        curDate.setDate(curDate.getDate()+1)
+    }
+    console.log(dates);
+    
+    return dates
 }
 
 
@@ -48,25 +97,31 @@ function PricesChart(props: { priceDetails: PriceDetail }) {
         {
             "a": [
                 {
-                    'x': 0,
+                    // 'x': 0,
+                    // 'x': new Date('2023-01-01'),
+                    'x': '20230101',
                     "y": null
                 }
             ]
         }
     );
 
+
+    const [count, setCount] = useState(0);
     const [isLoaded, setIsLoaded] = useState(false);
     const [legend, setLegend] = useState<Legend[]>();
     const [limits, setLimits] = useState(
         {
             maxCost: 0,
-            earliestDate: 20231201,
-            latestDate: 20231213
+            // earliestDate: '20231201',
+            // latestDate: '20231213'
+            earliestDate: 'Thu Dec 21 2023',
+            latestDate: 'Thu Dec 21 2023'
         }
     );
 
 
-    const screenWidth = Dimensions.get("window").width;
+    // const screenWidth = Dimensions.get("window").width;
 
 
     useEffect(() => {
@@ -102,25 +157,30 @@ function PricesChart(props: { priceDetails: PriceDetail }) {
             
             setLimits({
                 maxCost: maxCost,
-                earliestDate: dateStrToNum(earliestDate),
-                latestDate: dateStrToNum(latestDate)
+                earliestDate: earliestDate,
+                latestDate: latestDate
+                // earliestDate: dateStrToNum(earliestDate),
+                // latestDate: dateStrToNum(latestDate)
             })
 
             const groupedByStore: { [key: string]: DataEntry[] } = sortedPrices.reduce(
                 (result, obj) => {
                     const key: string = obj.store_id;
 
-                    console.log(obj.noted_at)
+                    console.log('noted at', obj.noted_at)
 
                     if (!result[key]) {
                         result[key] = [];
                     }
 
                     const date = new Date(obj.noted_at)
-                    console.log(date)
+                    // console.log(date)
 
                     result[key].push({
-                        x: Number('' + date.getFullYear() + (date.getMonth() + 1) + date.getDate()),
+                        // x: Number('' + date.getFullYear() + (date.getMonth() + 1) + date.getDate()),
+                        // x: dateObjToNum(date),
+                        // x: date,
+                        x: dateObjToRawStr(date),
                         y: obj.cost
                     });
 
@@ -157,7 +217,7 @@ function PricesChart(props: { priceDetails: PriceDetail }) {
         }
 
 
-    }, [prices])
+    }, [prices, count])
 
 
     return (
@@ -170,11 +230,12 @@ function PricesChart(props: { priceDetails: PriceDetail }) {
 
                 <VictoryAxis
                     fixLabelOverlap
-                    tickFormat={(x) => createDateString(x)}
-                    tickValues={createArrayInRange(limits.earliestDate, limits.latestDate)}
+                    tickFormat={(x) => dateStrFormat(x)}
+                    tickValues={dateStrsInRange(limits.earliestDate, limits.latestDate)}
                     style={{
                         grid: { stroke: 'grey' },
                     }}
+                    scale='time'
                 />
                 <VictoryAxis dependentAxis />
 

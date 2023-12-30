@@ -7,9 +7,9 @@ import { FlatList, ScrollView, View } from "react-native";
 import SinglePrice from "./SinglePrice";
 import { PriceDetail, StoreMap } from "../types";
 
-function PricesBox(props: { item_id: string; priceDetails: PriceDetail }) {
+function PricesBox(props: { item_id: string; priceDetails: PriceDetail, itemDetailsRefresh: () => void }) {
 
-    const { item_id, priceDetails } = props;
+    const { item_id, priceDetails, itemDetailsRefresh } = props;
     const prices = priceDetails.prices
     const storeMap = priceDetails.storeMap
 
@@ -17,7 +17,7 @@ function PricesBox(props: { item_id: string; priceDetails: PriceDetail }) {
     const [count, setCount] = useState(0);
     // const isFocused = useIsFocused();
 
-    const database = useContext(DbContext)
+    // const database = useContext(DbContext)
 
     console.log(prices.map(obj => obj.store_id))
 
@@ -26,8 +26,7 @@ function PricesBox(props: { item_id: string; priceDetails: PriceDetail }) {
 
 
     return (
-        <View>
-
+        <View style={{flexGrow: 1}}>
             <FlatList
                 data={prices}
                 keyExtractor={(price) => price.id.toString()}
@@ -36,12 +35,11 @@ function PricesBox(props: { item_id: string; priceDetails: PriceDetail }) {
                         price={item}
                         store_name={storeMap[item.store_id].store_name}
                         store_colour={storeMap[item.store_id] ? storeMap[item.store_id].store_colour : 'red'}
+                        itemDetailsRefresh={itemDetailsRefresh}
                     />}
                 contentContainerStyle={{flexGrow: 1, paddingBottom: 5}}
             />
-
         </View>
-
     );
 }
 
