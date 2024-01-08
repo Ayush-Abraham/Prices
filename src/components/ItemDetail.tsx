@@ -1,7 +1,7 @@
-import { Alert, Button, Text, View } from "react-native";
+import { Alert, Button, Pressable, Text, View } from "react-native";
 import Item from "../model/Item";
 import { ItemDetailRouteProp, PriceDetail, RootStackParamList } from "../types";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useIsFocused, useNavigation, useRoute } from "@react-navigation/native";
 import { DbContext } from "../App";
 import { useContext, useEffect, useState } from 'react';
 import { Collection, Q } from "@nozbe/watermelondb";
@@ -12,6 +12,7 @@ import PricesBox from "./PricesBox";
 import PricesChart from "./PricesChart";
 import Store from "../model/Store";
 import { StoreMap } from "../types";
+import { modalStyles, singleViewStyles } from "./styles/Styles";
 
 
 function ItemDetail() {
@@ -23,7 +24,6 @@ function ItemDetail() {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
     const [item, setItem] = useState<Item>();
-    // const [prices, setPrices] = useState<Price[]>([]);
     const [showPriceForm, setShowPriceForm] = useState(false)
     const [count, setCount] = useState(0)
     const [priceDetails, setPriceDetails] = useState<PriceDetail>({
@@ -37,6 +37,20 @@ function ItemDetail() {
     });
 
     useEffect(() => {
+
+        navigation.setOptions({
+            headerRight: () => (
+                <Pressable
+                    style={singleViewStyles.deleteButton}
+                    onPress={handleDeleteItem}
+                >
+                    <Text style={singleViewStyles.buttonText}>Delete Item</Text>
+
+                </Pressable>
+                )
+            
+        })
+
         async function fetchItemDetails() {
             const itemsCollection: Collection<Item> = database.collections.get('items')
             const foundItems: Item[] = await itemsCollection.query(
@@ -71,7 +85,7 @@ function ItemDetail() {
 
             console.log('calc store map')
             console.log(calcStoreMap)
-            
+
 
             setPriceDetails(
                 {
@@ -86,8 +100,11 @@ function ItemDetail() {
         }
 
         fetchItemDetails().catch(() => { console.error })
-
     }, [count])
+
+    useEffect(() => {
+        navigation.setOptions({ title: item?.item_name })
+    }, [item])
 
     async function handleDeleteItem() {
 
@@ -126,24 +143,28 @@ function ItemDetail() {
 
 
     function refresh() {
-        setCount(count+1)
+        setCount(count + 1)
     }
 
 
     return (
         <View>
-            <Text>Item Details</Text>
-            <Text>{item_id}</Text>
-            <Text>{item?.item_name}</Text>
 
-            <Button
+            {/* <Button
                 title="Delete item"
                 onPress={handleDeleteItem}
-            />
-            <Button
+            /> */}
+            {/* <Button
                 title={showPriceForm ? 'Back' : "Add new price"}
                 onPress={() => { setShowPriceForm(!showPriceForm) }}
-            />
+            /> */}
+            <Pressable
+                style={[modalStyles.button, modalStyles.buttonAdd]}
+                onPress={() => setShowPriceForm(true)}
+            >
+                <Text style={modalStyles.textStyle}>Add New Observation</Text>
+            </Pressable>
+
             <PriceForm
                 item_id={item_id}
                 isVisible={showPriceForm}

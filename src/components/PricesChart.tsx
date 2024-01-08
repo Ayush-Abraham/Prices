@@ -4,6 +4,7 @@ import { Dimensions } from "react-native";
 import { useEffect, useState } from "react";
 import { VictoryChart, VictoryTheme, VictoryLine, VictoryLegend, VictoryCursorContainer, VictoryAxis, VictoryLabel, VictoryScatter } from "victory-native";
 import { PriceDetail } from "../types";
+import LoadingScreen from "./LoadingScreen";
 
 
 type DataEntry = {
@@ -27,38 +28,33 @@ function dateStrFormat(rawDateStr: string): string {
 function dateStrToNum(dateStr: string) {
     const date = new Date(dateStr)
     return Number(''
-    + date.getFullYear()
-    + (date.getMonth() + 1).toString().padStart(2, '0')
-    + date.getDate().toString().padStart(2, '0')
+        + date.getFullYear()
+        + (date.getMonth() + 1).toString().padStart(2, '0')
+        + date.getDate().toString().padStart(2, '0')
     )
 }
 
 function dateObjToNum(dateObj: Date) {
     const date = dateObj.getDate().toString().padStart(2, '0')
-    const month = (dateObj.getMonth()+1).toString().padStart(2, '0')
+    const month = (dateObj.getMonth() + 1).toString().padStart(2, '0')
     const year = dateObj.getFullYear().toString()
     const dateNum = Number(year + month + date)
-    console.log('datenum',dateNum);    
     return dateNum
 }
 
 function dateObjToRawStr(dateObj: Date) {
     const date = dateObj.getDate().toString().padStart(2, '0')
-    const month = (dateObj.getMonth()+1).toString().padStart(2, '0')
+    const month = (dateObj.getMonth() + 1).toString().padStart(2, '0')
     const year = dateObj.getFullYear().toString()
-    const dateStr = year+month+date
+    const dateStr = year + month + date
     return dateStr
 }
 
 
 function dateStrToObj(dateStr: string) {
-    // const strNum: string = dateNum.toString()   
-    console.log(dateStr) 
     const strInt = dateStr.slice(0, 8)
     const dateString = strInt.slice(0, 4) + '-' + strInt.slice(4, 6) + '-' + strInt.slice(6, 8)
-    console.log(dateString);
     const dateObj = new Date(dateString)
-    // console.log(dateObj);    
     return dateObj
 }
 
@@ -67,21 +63,16 @@ function dateStrToObj(dateStr: string) {
 // }
 
 function dateStrsInRange(start: string, end: string) {
-    const curDate = new Date(start)//dateStrToObj(start)
-    const endDate = new Date(end)//dateStrToObj(end)
-
-    console.log('datestrsinrange', start, end);
-    
-    console.log(curDate, endDate)
+    const curDate = new Date(start)
+    const endDate = new Date(end)
 
     const dates = []
 
     while (curDate <= endDate) {
         dates.push(dateObjToRawStr(curDate))
-        curDate.setDate(curDate.getDate()+1)
+        curDate.setDate(curDate.getDate() + 1)
     }
-    console.log(dates);
-    
+
     return dates
 }
 
@@ -141,20 +132,16 @@ function PricesChart(props: { priceDetails: PriceDetail }) {
                 return obj.cost > max ? obj.cost : max;
             }, -Infinity) + 2
 
-            
+
 
             const earliestDate = prices.reduce((earliest, obj) => {
                 return Date.parse(obj.noted_at) < Date.parse(earliest.noted_at) ? obj : earliest;
-              }, prices[0]).noted_at;
-
-              console.log('earliest ', earliestDate)
+            }, prices[0]).noted_at;
 
             const latestDate = prices.reduce((latest, obj) => {
                 return Date.parse(obj.noted_at) > Date.parse(latest.noted_at) ? obj : latest;
             }, prices[0]).noted_at;
 
-            console.log('latest ', latestDate)
-            
             setLimits({
                 maxCost: maxCost,
                 earliestDate: earliestDate,
@@ -174,7 +161,6 @@ function PricesChart(props: { priceDetails: PriceDetail }) {
                     }
 
                     const date = new Date(obj.noted_at)
-                    // console.log(date)
 
                     result[key].push({
                         // x: Number('' + date.getFullYear() + (date.getMonth() + 1) + date.getDate()),
@@ -210,8 +196,8 @@ function PricesChart(props: { priceDetails: PriceDetail }) {
             setLegend(finalLegend)
 
 
-            console.log('data is set, ')
-            console.log(groupedByStore)
+            // console.log('data is set, ')
+            // console.log(groupedByStore)
 
             setIsLoaded(true)
         }
@@ -222,48 +208,51 @@ function PricesChart(props: { priceDetails: PriceDetail }) {
 
     return (
         <View>
-            <Text>Prices Chart</Text>
-            <VictoryChart
-                theme={VictoryTheme.material}
-                domain={{ y: [0, limits.maxCost] }}
-            >
+            {!isLoaded ? <LoadingScreen /> :
 
-                <VictoryAxis
-                    fixLabelOverlap
-                    tickFormat={(x) => dateStrFormat(x)}
-                    tickValues={dateStrsInRange(limits.earliestDate, limits.latestDate)}
-                    style={{
-                        grid: { stroke: 'grey' },
-                    }}
-                    scale='time'
-                />
-                <VictoryAxis dependentAxis />
+                <View>
+                    <VictoryChart
+                        theme={VictoryTheme.material}
+                        domain={{ y: [0, limits.maxCost] }}
+                    >
 
-                {
-                    Object.entries(datasets).map(([store_id, dataset]) =>
-                        <VictoryLine
-                            key={store_id}
+                        <VictoryAxis
+                            fixLabelOverlap
+                            tickFormat={(x) => dateStrFormat(x)}
+                            tickValues={dateStrsInRange(limits.earliestDate, limits.latestDate)}
                             style={{
-                                data: { stroke: storeMap[store_id] ? storeMap[store_id].store_colour : 'red' },
-                                parent: { border: "1px solid #ccc" },
+                                grid: { stroke: 'grey' },
                             }}
-                            data={dataset}
-                            sortKey='x'
+                            scale='time'
                         />
-                    )
-                }
-                {
-                    Object.entries(datasets).map(([store_id, dataset]) =>
-                        <VictoryScatter
-                            key={store_id}
-                            data={dataset}
+                        <VictoryAxis dependentAxis />
+
+                        {
+                            Object.entries(datasets).map(([store_id, dataset]) =>
+                                <VictoryLine
+                                    key={store_id}
+                                    style={{
+                                        data: { stroke: storeMap[store_id] ? storeMap[store_id].store_colour : 'red' },
+                                        parent: { border: "1px solid #ccc" },
+                                    }}
+                                    data={dataset}
+                                    sortKey='x'
+                                />
+                            )
+                        }
+                        {
+                            Object.entries(datasets).map(([store_id, dataset]) =>
+                                <VictoryScatter
+                                    key={store_id}
+                                    data={dataset}
+                                />
+                            )
+                        }
+                        < VictoryLegend
+                            data={legend}
                         />
-                    )
-                }
-                < VictoryLegend
-                    data={legend}
-                />
-            </VictoryChart>
+                    </VictoryChart>
+                </View>}
         </View >
     )
 }

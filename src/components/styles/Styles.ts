@@ -47,9 +47,25 @@ export const singleViewStyles = StyleSheet.create({
         // borderWidth: 1,
         backgroundColor: 'white',
         padding: 5,
-        marginHorizontal: 10,
+        paddingVertical: 10,
+        marginHorizontal: 20,
         marginVertical: 5,
         borderRadius: 10,
+    },
+    titleText: {
+        fontWeight: 'bold',
+        // textAlign: 'right'
+    },
+    deleteButton: {
+        backgroundColor: '#D11A2A',
+        borderRadius: 10,
+        paddingHorizontal: 15,
+        paddingVertical: 10
+    },
+    buttonText: {
+        color: 'white',
+        fontWeight: 'bold',
+
     }
 })
 
@@ -61,6 +77,13 @@ export const positionStyles = StyleSheet.create({
     }    
 })
 
+export const loadingStyles = StyleSheet.create({
+    container: {
+        justifyContent: 'space-around',
+        height: 250,
+        alignItems: 'center',
+    }
+})
 
 export const modalStyles = StyleSheet.create({
     centeredView: {
@@ -89,7 +112,7 @@ export const modalStyles = StyleSheet.create({
         elevation: 2,
         paddingHorizontal: 17
     },
-    buttonOpen: {
+    buttonAdd: {
         backgroundColor: 'green',
         margin: 10
     },

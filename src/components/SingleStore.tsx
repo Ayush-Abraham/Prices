@@ -1,4 +1,4 @@
-import { Alert, Button, Text, View } from "react-native";
+import { Alert, Button, Pressable, Text, View } from "react-native";
 import Store from "../model/Store";
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -13,9 +13,9 @@ import { PickerColours } from "../utilities";
 
 
 
-function SingleStore(props: { store: Store; }): React.JSX.Element {
+function SingleStore(props: { store: Store; storeScreenRefresh: () => void}): React.JSX.Element {
 
-    const { store } = props;
+    const { store, storeScreenRefresh } = props;
 
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -77,19 +77,14 @@ function SingleStore(props: { store: Store; }): React.JSX.Element {
             })
 
         })
-
-
-
-
-
-
+        storeScreenRefresh()
     }
 
 
     return (
         <View style={[positionStyles.horizontalContainer, singleViewStyles.viewingCard]}>
             <View style={positionStyles.horizontalContainer}>
-                <Text>{store.store_name}</Text>
+                <Text style={singleViewStyles.titleText}>{store.store_name}</Text>
                 <Picker
                     style={[dynamicBgColour(store.colour).dynamicBgColour, pickerStyles.colourPicker]}
                     item={selectedColour}
@@ -100,10 +95,16 @@ function SingleStore(props: { store: Store; }): React.JSX.Element {
                 />
             </View>
             <View>
-                <Button
+                {/* <Button
                     title={'Delete'}
                     onPress={handleDeleteStore}
-                />
+                /> */}
+                <Pressable
+                style={singleViewStyles.deleteButton}
+                onPress={handleDeleteStore}
+            >
+                <Text style={singleViewStyles.buttonText}>Delete</Text>
+            </Pressable>
             </View>
         </View>
     );

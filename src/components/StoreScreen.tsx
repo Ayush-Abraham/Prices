@@ -30,11 +30,15 @@ function StoreScreen() {
 
     }, [count, isFocused])
 
+    function refresh() {
+        setCount(count + 1)
+    }
+
     return (
         <View>
 
             <Pressable
-                style={[modalStyles.button, modalStyles.buttonOpen]}
+                style={[modalStyles.button, modalStyles.buttonAdd]}
                 onPress={() => setShowStoreForm(true)}
             >
                 <Text style={modalStyles.textStyle}>Add Store</Text>
@@ -52,7 +56,7 @@ function StoreScreen() {
             <FlatList
                 data={stores}
                 keyExtractor={(store) => store.id.toString()}
-                renderItem={({ item }) => <SingleStore store={item} />}
+                renderItem={({ item }) => <SingleStore store={item} storeScreenRefresh={refresh} />}
             />
         </View>
 

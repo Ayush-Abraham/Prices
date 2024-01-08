@@ -25,7 +25,7 @@ import Store from './model/Store';
 import Price from './model/Price';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './components/HomeScreen';
-import {RootStackParamList} from './types';
+import { RootStackParamList } from './types';
 import ItemDetail from './components/ItemDetail';
 import StoreScreen from './components/StoreScreen';
 
@@ -119,18 +119,20 @@ function App(): React.JSX.Element {
 
     return (
         <NavigationContainer>
-            <Stack.Navigator>         
+            <Stack.Navigator>
                 <Stack.Screen
                     name="HomeScreen"
                     component={HomeScreen}
+                    options={{ title: 'Tracked Items' }}
                 />
                 <Stack.Screen
                     name='ItemDetail'
-                    component={ItemDetail}
+                    component={ItemDetail}                    
                 />
                 <Stack.Screen
                     name='StoreScreen'
                     component={StoreScreen}
+                    options={{ title: 'Stores' }}
                 />
             </Stack.Navigator>
         </NavigationContainer>

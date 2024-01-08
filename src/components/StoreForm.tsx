@@ -27,7 +27,6 @@ function StoreForm(props: {
 
     const database = useContext(DbContext)
 
-
     async function handleAddStore() {
         console.log('handleaddstore')
         console.log(newStoreName)

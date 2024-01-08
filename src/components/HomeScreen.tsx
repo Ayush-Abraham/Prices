@@ -48,27 +48,17 @@ const HomeScreen = () => {
     // }
 
     return (
-        <View>
-            <Text>Test Loadup</Text>
-            <Text>{count}</Text>
+        <View>       
 
             <ItemForm isVisible={showItemForm} setVisible={setShowItemForm} count={count} setCount={setCount} />
 
-            {/* <Button
-                onPress={testAddItem}
-                title="test add more items"
-            /> */}
-            {/* <Button
-                onPress={testAddStore}
-                title="test add more stores"
-            /> */}
             <Button
                 onPress={() => { navigation.navigate('StoreScreen') }}
                 title="Show stores"
             />
 
             <Pressable
-                style={[modalStyles.button, modalStyles.buttonClose]}
+                style={[modalStyles.button, modalStyles.buttonAdd]}
                 onPress={() => setShowItemForm(true)}
             >
                 <Text style={modalStyles.textStyle}>Add Item</Text>
