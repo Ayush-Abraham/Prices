@@ -1,4 +1,17 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+This is a [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+
+# Prices
+An app development project for personal finance management.
+
+Ever been annoyed by fluctuating prices of freauently-bought groceries and other products, across multiple stores and multiple days? Ever wanted to be able to see exactly how a price has changed over the past few days, and which store might sell it the cheapest?
+
+Prices is an attempt to provide that very service. An app developed using React Native, it can track the price of multiple products across multiple stores, showing a visualisation of how their prices have changed recently, and where it might be prudent to purchase them right now.
+
+Currently only available for android.
+
+Existing features:
+
+
 
 # Getting Started
 
